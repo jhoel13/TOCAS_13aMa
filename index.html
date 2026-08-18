@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="TOCAS_13aMa - Laboratorio web de análisis matricial de armaduras 2D" />
+  <meta name="theme-color" content="#07111f" />
+  <title>TOCAS_13aMa | Matrix Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <section id="authView" class="auth-view">
+    <div class="auth-orbit orbit-a"></div><div class="auth-orbit orbit-b"></div>
+    <div class="auth-info">
+      <div class="brand-lockup"><div class="brand-cube">T13</div><div><b>TOCAS_13aMa</b><span>STRUCTURAL MATRIX LAB</span></div></div>
+      <div class="auth-copy">
+        <span class="eyebrow">INGENIERÍA ESTRUCTURAL · WEB APP</span>
+        <h1>Del modelo estructural<br><em>a la respuesta matricial.</em></h1>
+        <p>Construye armaduras 2D, resuelve el método de rigidez directa y revisa cada etapa del cálculo desde una sola interfaz.</p>
+        <div class="feature-strip"><span>✓ Matrices</span><span>✓ Deformada</span><span>✓ Reacciones</span><span>✓ PDF / Excel</span></div>
+      </div>
+      <div class="institution">Universidad Nacional de Cajamarca · Ingeniería Hidráulica</div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-card">
+        <div class="mobile-brand"><div class="brand-cube">T13</div><b>TOCAS_13aMa</b></div>
+        <span class="mini-label">ACCESO AL LABORATORIO</span>
+        <h2>Bienvenido</h2><p>Ingresa para continuar con tus modelos estructurales.</p>
+        <div class="auth-tabs"><button class="active" data-auth-tab="login">Ingresar</button><button data-auth-tab="register">Crear cuenta</button></div>
+        <form id="loginForm" class="auth-form">
+          <label>Correo electrónico<input id="loginEmail" type="email" placeholder="jhoel@unc.edu.pe" required></label>
+          <label>Contraseña<input id="loginPassword" type="password" minlength="4" placeholder="••••••••" required></label>
+          <button class="btn primary auth-submit" type="submit">Entrar al laboratorio →</button>
+        </form>
+        <form id="registerForm" class="auth-form hidden">
+          <label>Nombre completo<input id="registerName" type="text" placeholder="Jhoel Tocas" required></label>
+          <label>Correo electrónico<input id="registerEmail" type="email" required></label>
+          <label>Contraseña<input id="registerPassword" type="password" minlength="4" required></label>
+          <button class="btn primary auth-submit" type="submit">Crear cuenta →</button>
+        </form>
+        <div class="security-note">Sesión académica local. Los datos de acceso se almacenan únicamente en este navegador.</div>
+      </div>
+    </div>
+  </section>
+
+  <div id="appView" class="app-shell hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-brand"><div class="brand-cube small">T13</div><div><b>TOCAS_13aMa</b><span>MATRIX LAB 2D</span></div></div>
+      <div class="side-label">ESPACIO DE TRABAJO</div>
+      <nav>
+        <button class="nav-item active" data-view="workspace"><i>01</i><span>Análisis estructural</span></button>
+        <button class="nav-item" data-view="theory"><i>02</i><span>Biblioteca teórica</span></button>
+        <button class="nav-item" data-view="reports"><i>03</i><span>Reportes y archivos</span></button>
+        <button class="nav-item" data-view="about"><i>04</i><span>Información</span></button>
+      </nav>
+      <div class="sidebar-callout"><b>Método de rigidez directa</b><span>Armaduras planas · 2 GDL por nodo</span></div>
+      <div class="sidebar-bottom"><button id="themeToggle" class="nav-item compact"><i>◐</i><span>Cambiar tema</span></button><button id="logoutBtn" class="nav-item compact danger"><i>↗</i><span>Cerrar sesión</span></button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title-cluster"><button id="menuBtn" class="icon-btn mobile-only">☰</button><div><span class="breadcrumb">TOCAS_13aMa / LABORATORIO</span><h2 id="viewTitle">Análisis matricial de armaduras 2D</h2><p id="statusText">Motor de rigidez directa listo para calcular</p></div></div>
+        <div class="top-actions"><button id="loadExample1" class="btn ghost">Ejemplo 01</button><button id="loadExample2" class="btn ghost">Ejemplo 02</button><button id="solveBtn" class="btn primary">▶ Ejecutar análisis</button></div>
+      </header>
+
+      <section id="workspace" class="view active-view">
+        <div class="hero-dashboard">
+          <div><span class="eyebrow">PANEL DE CONTROL</span><h3>Modelo estructural activo</h3><p>Edita geometría, propiedades, cargas y restricciones; luego ejecuta todo el procedimiento matricial.</p></div>
+          <div class="hero-badge">2D TRUSS <small>AXIAL ONLY</small></div>
+        </div>
+        <div class="stats-grid"><article class="stat"><span>01 · NODOS</span><strong id="statNodes">0</strong><small>geometría</small></article><article class="stat"><span>02 · BARRAS</span><strong id="statBars">0</strong><small>elementos</small></article><article class="stat"><span>03 · GDL</span><strong id="statDofs">0</strong><small>sistema global</small></article><article class="stat accent"><span>04 · MÁX |u|</span><strong id="statDisp">—</strong><small>desplazamiento</small></article></div>
+
+        <div class="layout-2">
+          <section class="panel input-panel">
+            <div class="panel-head"><div><span class="panel-kicker">INPUT / MODEL</span><h3>Definición del modelo</h3><p>Parámetros editables para estructuras personalizadas.</p></div><button id="resetBtn" class="btn subtle">Nuevo modelo</button></div>
+            <div class="form-grid compact"><label>Unidad longitud<input id="lengthUnit" value="cm"></label><label>Unidad fuerza<input id="forceUnit" value="kgf"></label><label>Escala deformada<input id="deformScale" type="number" value="500" min="0.01" step="10"></label></div>
+            <details open><summary><span>01</span>Nodos y coordenadas</summary><div class="table-wrap"><table><thead><tr><th>Nodo</th><th>X</th><th>Y</th><th></th></tr></thead><tbody id="nodesBody"></tbody></table></div><button class="mini-add" data-add="node">+ Agregar nodo</button></details>
+            <details><summary><span>02</span>Barras / elementos</summary><div class="table-wrap"><table><thead><tr><th>#</th><th>i</th><th>j</th><th>A</th><th>E</th><th></th></tr></thead><tbody id="barsBody"></tbody></table></div><button class="mini-add" data-add="bar">+ Agregar barra</button></details>
+            <details><summary><span>03</span>Cargas nodales</summary><div class="table-wrap"><table><thead><tr><th>Nodo</th><th>Fx</th><th>Fy</th><th></th></tr></thead><tbody id="loadsBody"></tbody></table></div><button class="mini-add" data-add="load">+ Agregar carga</button></details>
+            <details><summary><span>04</span>Restricciones / apoyos</summary><div class="table-wrap"><table><thead><tr><th>Nodo</th><th>Ux</th><th>Uy</th><th></th></tr></thead><tbody id="supportsBody"></tbody></table></div><button class="mini-add" data-add="support">+ Agregar apoyo</button></details>
+          </section>
+
+          <section class="panel canvas-panel">
+            <div class="panel-head"><div><span class="panel-kicker">VIEWPORT / STRUCTURE</span><h3>Visualizador estructural</h3><p>Geometría original, cargas, apoyos y deformada.</p></div><div class="live-pill"><span></span> LIVE MODEL</div></div>
+            <canvas id="trussCanvas" width="1000" height="650"></canvas>
+            <div class="canvas-controls"><label><input id="showLabels" type="checkbox" checked> Nodos</label><label><input id="showLoads" type="checkbox" checked> Cargas</label><label><input id="showDeformed" type="checkbox" checked> Deformada</label><span class="legend"><i class="tension"></i>Tracción <i class="compression"></i>Compresión</span><button id="fitBtn" class="btn subtle">Ajustar vista</button></div>
+          </section>
+        </div>
+
+        <section id="resultsPanel" class="panel results-panel"><div class="panel-head"><div><span class="panel-kicker">OUTPUT / CALCULATION</span><h3>Procedimiento matricial y resultados</h3><p>Revisión paso a paso del análisis por rigidez directa.</p></div><div><button id="exportPdfTop" class="btn ghost">PDF</button> <button id="exportExcelTop" class="btn ghost">Excel</button></div></div><div id="resultTabs" class="result-tabs"></div><div id="resultContent" class="result-content empty-state">Carga un ejemplo o define tu estructura y pulsa <strong>Ejecutar análisis</strong>.</div></section>
+      </section>
+
+      <section id="theory" class="view"><div class="theory-hero panel"><span class="eyebrow">BIBLIOTECA DE INGENIERÍA</span><h2>Fundamentos del método matricial de rigidez</h2><p>Conceptos, ecuaciones e interpretación física de cada etapa que ejecuta el motor.</p></div><div class="theory-grid" id="theoryGrid"></div></section>
+      <section id="reports" class="view"><div class="panel report-center"><span class="eyebrow">EXPORT CENTER</span><h2>Reportes técnicos del análisis</h2><p>Descarga resultados del último modelo resuelto para revisión académica o documentación.</p><div class="report-actions"><button id="exportPdfBtn" class="btn primary big">Generar informe PDF</button><button id="exportExcelBtn" class="btn ghost big">Exportar libro Excel</button><button id="exportJsonBtn" class="btn ghost big">Guardar modelo JSON</button><label class="btn ghost big file-label">Importar modelo JSON<input id="importJson" type="file" accept="application/json"></label></div><div class="report-note">PDF: resumen y resultados. Excel: hojas separadas. JSON: respaldo editable del modelo.</div></div></section>
+      <section id="about" class="view"><div class="about-grid"><div class="panel"><span class="eyebrow">PROYECTO</span><h2>TOCAS_13aMa</h2><p>Aplicación académica para análisis matricial de armaduras planas mediante el método de rigidez directa.</p><div class="about-data"><div><span>Autor</span><b>Jhoel Tocas Cercado</b></div><div><span>Institución</span><b>Universidad Nacional de Cajamarca</b></div><div><span>Área</span><b>Ingeniería estructural / cálculo matricial</b></div></div></div><div class="panel code-panel"><span class="eyebrow">ENGINE</span><h3>Flujo de cálculo</h3><pre>Geometría → k_local → T → k_global
+→ Ensamblaje K → GDL libres
+→ Kff · Uf = Ff → U
+→ R = K·U − F
+→ ε → σ → N</pre></div></div></section>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+</body>
+</html>
